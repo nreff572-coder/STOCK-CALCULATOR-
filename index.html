@@ -1,0 +1,794 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Stock Health Calculator Pro</title>
+    <style>
+      /* CSS RESET & VARIABLES */
+      :root {
+        --bg-main: #081120;
+        --bg-card: rgba(15, 23, 42, 0.6);
+        --border-color: rgba(40, 183, 255, 0.15);
+        --primary: #28b7ff;
+        --text-main: #e2e8f0;
+        --text-muted: #94a3b8;
+        --success: #00e676;
+        --warning: #ffc107;
+        --danger: #ff5252;
+        --font-stack:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu,
+          Cantarell, sans-serif;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: var(--font-stack);
+        background-color: var(--bg-main);
+        color: var(--text-main);
+        line-height: 1.6;
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        padding: 40px 20px;
+        background-image: radial-gradient(
+          circle at 10% 20%,
+          rgba(40, 183, 255, 0.05) 0%,
+          transparent 50%
+        );
+      }
+
+      /* LAYOUT & GLASSMORPHISM */
+      .container {
+        width: 100%;
+        max-width: 1000px;
+        display: grid;
+        gap: 24px;
+      }
+
+      .glass-panel {
+        background: var(--bg-card);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        padding: 32px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+      }
+
+      /* HEADER & TABS */
+      header {
+        text-align: left;
+        margin-bottom: 20px;
+        border-bottom: 1px solid var(--border-color);
+        padding-bottom: 20px;
+      }
+      h1 {
+        font-size: 24px;
+        font-weight: 600;
+        color: var(--primary);
+        letter-spacing: -0.5px;
+      }
+      .subtitle {
+        color: var(--text-muted);
+        font-size: 14px;
+      }
+
+      .tabs {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 24px;
+      }
+      .tab-btn {
+        background: transparent;
+        border: 1px solid var(--border-color);
+        color: var(--text-muted);
+        padding: 10px 20px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        outline: none;
+      }
+      .tab-btn.active {
+        background: var(--primary);
+        color: #000;
+        border-color: var(--primary);
+        box-shadow: 0 0 15px rgba(40, 183, 255, 0.3);
+      }
+
+      /* FORMS */
+      .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+      }
+      .input-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      label {
+        font-size: 13px;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-weight: 600;
+      }
+      input {
+        background: rgba(0, 0, 0, 0.2);
+        border: 1px solid var(--border-color);
+        color: #fff;
+        padding: 12px 16px;
+        border-radius: 8px;
+        font-size: 16px;
+        outline: none;
+        transition: border 0.3s;
+      }
+      input:focus {
+        border-color: var(--primary);
+      }
+
+      .action-row {
+        margin-top: 30px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .btn-primary {
+        background: var(--primary);
+        color: #000;
+        border: none;
+        padding: 14px 32px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 15px;
+        cursor: pointer;
+        transition:
+          transform 0.2s,
+          box-shadow 0.2s;
+      }
+      .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(40, 183, 255, 0.4);
+      }
+      .btn-secondary {
+        background: transparent;
+        color: var(--text-main);
+        border: 1px solid var(--border-color);
+        padding: 10px 20px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 14px;
+      }
+
+      /* RESULTS DASHBOARD */
+      #resultSection {
+        display: none;
+        margin-top: 40px;
+        animation: fadeIn 0.5s ease;
+      }
+      .dashboard-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+        flex-wrap: wrap;
+        gap: 20px;
+      }
+      .score-box {
+        text-align: right;
+      }
+      .score-value {
+        font-size: 48px;
+        font-weight: 700;
+        line-height: 1;
+      }
+      .score-grade {
+        font-size: 18px;
+        font-weight: 600;
+        margin-top: 5px;
+        padding: 4px 12px;
+        border-radius: 20px;
+        display: inline-block;
+      }
+
+      .ticker-title {
+        font-size: 32px;
+        font-weight: 700;
+        letter-spacing: 1px;
+      }
+
+      .grid-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+        margin-bottom: 24px;
+      }
+      @media (max-width: 768px) {
+        .grid-2 {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .list-box {
+        background: rgba(0, 0, 0, 0.2);
+        padding: 20px;
+        border-radius: 12px;
+      }
+      .list-box h3 {
+        font-size: 15px;
+        margin-bottom: 15px;
+        color: var(--primary);
+        border-bottom: 1px solid var(--border-color);
+        padding-bottom: 10px;
+      }
+      .list-item {
+        margin-bottom: 10px;
+        font-size: 14px;
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+      }
+      .list-item.pro::before {
+        content: "✓";
+        color: var(--success);
+        font-weight: bold;
+      }
+      .list-item.con::before {
+        content: "✗";
+        color: var(--danger);
+        font-weight: bold;
+      }
+      .list-item.risk::before {
+        content: "⚠";
+        color: var(--warning);
+        font-weight: bold;
+      }
+
+      /* BARS & METRICS */
+      .metric-row {
+        margin-bottom: 16px;
+      }
+      .metric-header {
+        display: flex;
+        justify-content: space-between;
+        font-size: 14px;
+        margin-bottom: 6px;
+      }
+      .metric-bar-bg {
+        width: 100%;
+        height: 8px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 4px;
+        overflow: hidden;
+      }
+      .metric-bar-fill {
+        height: 100%;
+        border-radius: 4px;
+        transition: width 1s ease-in-out;
+      }
+
+      /* LONG CONCLUSION */
+      .conclusion-box {
+        line-height: 1.8;
+        font-size: 15px;
+        color: #cbd5e1;
+        text-align: justify;
+      }
+      .conclusion-box p {
+        margin-bottom: 16px;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* PRINT STYLES FOR PDF EXPORT */
+      @media print {
+        body {
+          background: #fff;
+          color: #000;
+          padding: 0;
+        }
+        .glass-panel {
+          box-shadow: none;
+          border: 1px solid #ccc;
+          background: #fff;
+        }
+        .tabs,
+        .action-row,
+        input,
+        .input-group,
+        header .subtitle {
+          display: none !important;
+        }
+        .container {
+          display: block;
+        }
+        #resultSection {
+          display: block !important;
+          page-break-inside: avoid;
+        }
+        * {
+          color: #000 !important;
+        }
+        .metric-bar-bg {
+          background: #eee;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="glass-panel" id="inputPanel">
+        <header>
+          <h1>Stock Health Pro</h1>
+          <div class="subtitle">
+            Platform Analisis Fundamental Institusional
+          </div>
+        </header>
+
+        <div class="tabs">
+          <button class="tab-btn active" onclick="switchTab('nonbank')">
+            Sektor Non-Bank
+          </button>
+          <button class="tab-btn" onclick="switchTab('bank')">
+            Sektor Bank
+          </button>
+        </div>
+
+        <form id="calcForm">
+          <div class="form-grid">
+            <div class="input-group">
+              <label>Kode Saham</label>
+              <input
+                type="text"
+                id="ticker"
+                placeholder="Cth: ASII"
+                required
+                style="text-transform: uppercase"
+              />
+            </div>
+            <div class="input-group">
+              <label>ROE (%)</label>
+              <input
+                type="number"
+                id="roe"
+                step="0.01"
+                placeholder="Cth: 15.5"
+                required
+              />
+            </div>
+            <div class="input-group">
+              <label>PBV (x)</label>
+              <input
+                type="number"
+                id="pbv"
+                step="0.01"
+                placeholder="Cth: 1.2"
+                required
+              />
+            </div>
+            <div class="input-group">
+              <label>PER (x)</label>
+              <input
+                type="number"
+                id="per"
+                step="0.01"
+                placeholder="Cth: 12.5"
+                required
+              />
+            </div>
+            <div class="input-group">
+              <label>Dividend Yield (%)</label>
+              <input
+                type="number"
+                id="dy"
+                step="0.01"
+                placeholder="Cth: 4.5"
+                required
+              />
+            </div>
+
+            <div class="input-group nonbank-only">
+              <label>DER (x)</label>
+              <input
+                type="number"
+                id="der"
+                step="0.01"
+                placeholder="Cth: 0.8"
+              />
+            </div>
+            <div class="input-group nonbank-only">
+              <label>Current Ratio (x)</label>
+              <input type="number" id="cr" step="0.01" placeholder="Cth: 2.1" />
+            </div>
+
+            <div class="input-group bank-only" style="display: none">
+              <label>CAR (%)</label>
+              <input
+                type="number"
+                id="car"
+                step="0.01"
+                placeholder="Cth: 22.0"
+              />
+            </div>
+            <div class="input-group bank-only" style="display: none">
+              <label>NPL (%)</label>
+              <input
+                type="number"
+                id="npl"
+                step="0.01"
+                placeholder="Cth: 1.5"
+              />
+            </div>
+          </div>
+
+          <div class="action-row">
+            <button
+              type="button"
+              class="btn-primary"
+              onclick="calculateHealth()"
+            >
+              Analisis Fundamental
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <div class="glass-panel" id="resultSection">
+        <div class="action-row" style="margin-top: 0; margin-bottom: 20px">
+          <button
+            class="btn-secondary"
+            onclick="
+              document.getElementById('resultSection').style.display = 'none'
+            "
+          >
+            ← Edit Data
+          </button>
+          <button class="btn-secondary" onclick="window.print()">
+            Export PDF
+          </button>
+        </div>
+
+        <div class="dashboard-header">
+          <div>
+            <div class="ticker-title" id="resTicker">ASII</div>
+            <div style="color: var(--text-muted)" id="resType">
+              Sektor: Non-Bank
+            </div>
+          </div>
+          <div class="score-box">
+            <div class="score-value" id="resScore">85</div>
+            <div class="score-grade" id="resGrade">A - SEHAT</div>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="list-box">
+            <h3>Visualisasi Metrik</h3>
+            <div id="metricsBars"></div>
+          </div>
+          <div class="list-box">
+            <h3>Rekomendasi Investasi</h3>
+            <p
+              id="resRecommendation"
+              style="font-size: 16px; font-weight: 600; line-height: 1.4"
+            ></p>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="list-box">
+            <h3>Kekuatan (Pros)</h3>
+            <div id="listPros"></div>
+          </div>
+          <div class="list-box">
+            <h3>Kelemahan & Risiko (Cons/Risks)</h3>
+            <div id="listCons"></div>
+          </div>
+        </div>
+
+        <div
+          class="glass-panel"
+          style="margin-top: 24px; background: rgba(0, 0, 0, 0.3)"
+        >
+          <h3
+            style="
+              color: var(--primary);
+              margin-bottom: 20px;
+              font-size: 18px;
+              border-bottom: 1px solid var(--border-color);
+              padding-bottom: 10px;
+            "
+          >
+            Executive Summary & Analisis Mendalam
+          </h3>
+          <div class="conclusion-box" id="longConclusion"></div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let currentMode = "nonbank";
+
+      function switchTab(mode) {
+        currentMode = mode;
+        document
+          .querySelectorAll(".tab-btn")
+          .forEach((btn) => btn.classList.remove("active"));
+        event.target.classList.add("active");
+
+        if (mode === "nonbank") {
+          document
+            .querySelectorAll(".nonbank-only")
+            .forEach((el) => (el.style.display = "flex"));
+          document
+            .querySelectorAll(".bank-only")
+            .forEach((el) => (el.style.display = "none"));
+        } else {
+          document
+            .querySelectorAll(".nonbank-only")
+            .forEach((el) => (el.style.display = "none"));
+          document
+            .querySelectorAll(".bank-only")
+            .forEach((el) => (el.style.display = "flex"));
+        }
+      }
+
+      // Scoring Logic based on Rules
+      const getScoreROE = (val) =>
+        val >= 20 ? 100 : val >= 15 ? 85 : val >= 10 ? 70 : val >= 5 ? 50 : 25;
+      const getScoreDER = (val) =>
+        val <= 0.5 ? 100 : val <= 1 ? 85 : val <= 2 ? 70 : val <= 3 ? 50 : 25;
+      const getScorePBV = (val) =>
+        val <= 1 ? 100 : val <= 2 ? 85 : val <= 3 ? 70 : val <= 5 ? 50 : 25;
+      const getScorePER = (val) =>
+        val <= 10 ? 100 : val <= 15 ? 85 : val <= 20 ? 70 : val <= 30 ? 50 : 25;
+      const getScoreDY = (val) =>
+        val >= 8 ? 100 : val >= 5 ? 85 : val >= 3 ? 70 : val >= 1 ? 50 : 25;
+      const getScoreCR = (val) =>
+        val >= 2
+          ? 100
+          : val >= 1.5
+            ? 85
+            : val >= 1
+              ? 70
+              : val >= 0.75
+                ? 50
+                : 25;
+      const getScoreCAR = (val) =>
+        val >= 20 ? 100 : val >= 16 ? 85 : val >= 12 ? 70 : val >= 8 ? 50 : 25;
+      const getScoreNPL = (val) =>
+        val <= 1 ? 100 : val <= 2 ? 85 : val <= 3 ? 70 : val <= 5 ? 50 : 25;
+
+      function getColor(score) {
+        if (score >= 80) return "var(--success)";
+        if (score >= 60) return "var(--warning)";
+        return "var(--danger)";
+      }
+
+      function calculateHealth() {
+        const ticker =
+          document.getElementById("ticker").value.toUpperCase() || "UNKNOWN";
+        let totalScore = 0;
+        let metrics = [];
+        let pros = [];
+        let cons = [];
+
+        const vROE = parseFloat(document.getElementById("roe").value) || 0;
+        const vPBV = parseFloat(document.getElementById("pbv").value) || 0;
+        const vPER = parseFloat(document.getElementById("per").value) || 0;
+        const vDY = parseFloat(document.getElementById("dy").value) || 0;
+
+        let sROE = getScoreROE(vROE);
+        metrics.push({ name: "ROE", val: vROE + "%", score: sROE });
+        let sPBV = getScorePBV(vPBV);
+        metrics.push({ name: "PBV", val: vPBV + "x", score: sPBV });
+        let sPER = getScorePER(vPER);
+        metrics.push({ name: "PER", val: vPER + "x", score: sPER });
+        let sDY = getScoreDY(vDY);
+        metrics.push({ name: "Div Yield", val: vDY + "%", score: sDY });
+
+        // Analysis text building blocks
+        let analysisData = {
+          profit:
+            vROE >= 15
+              ? "Perusahaan menunjukkan efisiensi modal yang luar biasa dengan tingkat profitabilitas tinggi."
+              : "Tingkat pengembalian ekuitas perlu ditingkatkan untuk menarik modal jangka panjang.",
+          valuation:
+            vPER <= 15 && vPBV <= 2
+              ? "Valuasi saat ini berada di teritori undervalue, menawarkan margin of safety yang memadai."
+              : "Valuasi saat ini mencerminkan ekspektasi tinggi pasar, sehingga membatasi margin keamanan bagi investor konservatif.",
+          dividend:
+            vDY >= 5
+              ? "Manajemen secara konsisten mendistribusikan kas kepada pemegang saham, indikasi kuat arus kas yang sehat."
+              : "Kebijakan dividen tergolong konservatif, kemungkinan karena laba ditahan untuk ekspansi atau tekanan cash flow.",
+          risk: "",
+        };
+
+        if (sROE >= 85) pros.push("Profitabilitas sangat solid (ROE Tinggi)");
+        else if (sROE <= 50)
+          cons.push("Tingkat pengembalian modal (ROE) rendah");
+        if (sPBV >= 85) pros.push("Valuasi buku masih terdiskon (PBV Menarik)");
+        else if (sPBV <= 50)
+          cons.push("Valuasi harga buku (PBV) tergolong mahal");
+        if (sPER >= 85) pros.push("Valuasi laba murah (PER Rendah)");
+        else if (sPER <= 50) cons.push("Valuasi laba (PER) cukup premium");
+        if (sDY >= 85) pros.push("Imbal hasil dividen sangat atraktif");
+        else if (sDY <= 50)
+          cons.push("Yield dividen kurang memadai untuk income investor");
+
+        if (currentMode === "nonbank") {
+          const vDER = parseFloat(document.getElementById("der").value) || 0;
+          const vCR = parseFloat(document.getElementById("cr").value) || 0;
+          let sDER = getScoreDER(vDER);
+          metrics.push({ name: "DER", val: vDER + "x", score: sDER });
+          let sCR = getScoreCR(vCR);
+          metrics.push({ name: "Current Ratio", val: vCR + "x", score: sCR });
+          totalScore = (sROE + sPBV + sPER + sDY + sDER + sCR) / 6;
+
+          if (sDER >= 85) pros.push("Struktur modal sehat, utang terkendali");
+          else if (sDER <= 50) {
+            cons.push("Beban utang tinggi (DER Berisiko)");
+            cons.push("Risiko solvabilitas jika suku bunga naik");
+          }
+          if (sCR >= 85) pros.push("Likuiditas jangka pendek sangat aman");
+          else if (sCR <= 50) {
+            cons.push("Likuiditas ketat (Current Ratio rendah)");
+            cons.push("Risiko gagal bayar kewajiban lancar");
+          }
+
+          analysisData.risk =
+            vDER > 2
+              ? "Struktur modal perusahaan heavily-leveraged, menimbulkan risiko solvabilitas yang signifikan di tengah ketidakpastian makroekonomi."
+              : "Manajemen menjaga leverage di batas wajar, memberikan fleksibilitas neraca untuk menghadapi guncangan ekonomi sektoral.";
+        } else {
+          const vCAR = parseFloat(document.getElementById("car").value) || 0;
+          const vNPL = parseFloat(document.getElementById("npl").value) || 0;
+          let sCAR = getScoreCAR(vCAR);
+          metrics.push({ name: "CAR", val: vCAR + "%", score: sCAR });
+          let sNPL = getScoreNPL(vNPL);
+          metrics.push({ name: "NPL", val: vNPL + "%", score: sNPL });
+          totalScore = (sROE + sPBV + sPER + sDY + sCAR + sNPL) / 6;
+
+          if (sCAR >= 85) pros.push("Kecukupan modal (CAR) sangat kokoh");
+          else if (sCAR <= 50) {
+            cons.push("Modal penyangga tipis (CAR rendah)");
+            cons.push("Risiko regulasi terkait permodalan bank");
+          }
+          if (sNPL >= 85)
+            pros.push("Kualitas aset sangat terjaga (NPL Rendah)");
+          else if (sNPL <= 50) {
+            cons.push("Kredit bermasalah (NPL) mengkhawatirkan");
+            cons.push("Risiko penurunan laba akibat beban provisi");
+          }
+
+          analysisData.risk =
+            vNPL > 3
+              ? "Kualitas aset memburuk yang ditandai dengan NPL tinggi, menuntut provisi besar yang akan menggerus net income."
+              : "Bank memiliki fungsi intermediasi yang sehat dengan manajemen risiko kredit yang pruden, terlihat dari rasio NPL yang terkendali di bawah batas psikologis.";
+        }
+
+        // Generate Grade & Recommendation
+        let gradeDesc = "",
+          rec = "",
+          badgeColor = "";
+        if (totalScore >= 90) {
+          gradeDesc = "Grade A+ | SANGAT SEHAT";
+          rec = "Sangat Layak Dipertimbangkan untuk Investasi Jangka Panjang.";
+          badgeColor = "var(--success)";
+        } else if (totalScore >= 80) {
+          gradeDesc = "Grade A | SEHAT";
+          rec = "Layak Dipertimbangkan dengan Risiko Relatif Rendah.";
+          badgeColor = "var(--success)";
+        } else if (totalScore >= 70) {
+          gradeDesc = "Grade B | CUKUP BAIK";
+          rec = "Cukup Menarik Namun Tetap Memerlukan Analisis Tambahan.";
+          badgeColor = "var(--warning)";
+        } else if (totalScore >= 60) {
+          gradeDesc = "Grade C | PERLU PERHATIAN";
+          rec = "Perlu Kehati-hatian Sebelum Mengambil Keputusan Investasi.";
+          badgeColor = "var(--warning)";
+        } else {
+          gradeDesc = "Grade D | BERISIKO";
+          rec =
+            "Risiko Fundamental Relatif Tinggi dan Memerlukan Evaluasi Mendalam.";
+          badgeColor = "var(--danger)";
+        }
+
+        // Render UI
+        document.getElementById("resTicker").innerText = ticker;
+        document.getElementById("resType").innerText =
+          currentMode === "nonbank" ? "Sektor: Non-Bank" : "Sektor: Perbankan";
+        document.getElementById("resScore").innerText = Math.round(totalScore);
+        document.getElementById("resScore").style.color = badgeColor;
+        document.getElementById("resGrade").innerText = gradeDesc;
+        document.getElementById("resGrade").style.backgroundColor = badgeColor
+          .replace(")", ", 0.2)")
+          .replace("var", "rgba");
+        document.getElementById("resGrade").style.color = badgeColor;
+        document.getElementById("resRecommendation").innerText = rec;
+
+        // Render Metrics Bars
+        let barsHtml = "";
+        metrics.forEach((m) => {
+          barsHtml += `
+                <div class="metric-row">
+                    <div class="metric-header">
+                        <span>${m.name} (${m.val})</span>
+                        <span style="color: ${getColor(m.score)}">${m.score}/100</span>
+                    </div>
+                    <div class="metric-bar-bg">
+                        <div class="metric-bar-fill" style="width: ${m.score}%; background: ${getColor(m.score)}"></div>
+                    </div>
+                </div>
+            `;
+        });
+        document.getElementById("metricsBars").innerHTML = barsHtml;
+
+        // Render Pros / Cons
+        if (pros.length === 0)
+          pros.push(
+            "Tidak ada keunggulan fundamental mencolok berdasarkan data saat ini.",
+          );
+        if (cons.length === 0)
+          cons.push(
+            "Risiko terukur dan minimal berdasarkan rasio yang dimasukkan.",
+          );
+
+        document.getElementById("listPros").innerHTML = pros
+          .map((p) => `<div class="list-item pro">${p}</div>`)
+          .join("");
+        document.getElementById("listCons").innerHTML = cons
+          .map(
+            (c) =>
+              `<div class="list-item ${c.includes("Risiko") ? "risk" : "con"}">${c}</div>`,
+          )
+          .join("");
+
+        // Construct Dynamic 700+ Words Conclusion
+        let longText = `
+            <p><strong>Ringkasan Eksekutif</strong><br>
+            Berdasarkan analisis komprehensif terhadap metrik fundamental yang diinput untuk ${ticker}, perusahaan saat ini membukukan skor fundamental sebesar <strong>${Math.round(totalScore)}/100</strong>. Skor ini merefleksikan klasifikasi <strong>${gradeDesc.split("|")[1].trim()}</strong> dalam metodologi kami. Evaluasi ini didasarkan pada triangulasi antara efisiensi modal, valuasi pasar, kapabilitas distribusi kas, serta profil risiko dari sisi struktur neraca.</p>
+
+            <p><strong>Tinjauan Profitabilitas dan Kualitas Laba</strong><br>
+            Dalam konteks profitabilitas, ${analysisData.profit} Rasio Return on Equity (ROE) merupakan proksi utama dalam menilai seberapa lihai manajemen mengapitalisasi ekuitas dari pemegang saham menjadi *net profit*. ROE yang tercatat memberikan gambaran bahwa ${vROE >= 15 ? "perusahaan memiliki " : "perusahaan kekurangan "} *economic moat* atau keunggulan kompetitif di industrinya. Emiten yang mampu mempertahankan ROE tinggi seringkali memiliki *pricing power* yang kuat, memungkinkan mereka meneruskan beban inflasi ke konsumen akhir tanpa mengorbankan volume penjualan secara signifikan.</p>
+
+            <p><strong>Perspektif Valuasi Pasar</strong><br>
+            Meninjau aspek *pricing* di bursa, ${analysisData.valuation} Metrik Price to Earnings Ratio (PER) dan Price to Book Value (PBV) harus dilihat sebagai refleksi optimisme pasar. Dengan PER di level ${vPER}x dan PBV di level ${vPBV}x, pasar sedang ${vPBV > 2 ? "memberikan premium atas aset" : "menilai aset secara konservatif"}. Bagi investor penganut *value investing*, keseimbangan antara harga yang dibayar dan nilai yang didapat adalah kunci. Membeli aset bagus pada harga premium seringkali memangkas potensi *Capital Gain* di masa depan.</p>
+
+            <p><strong>Ketahanan Neraca dan Manajemen Risiko</strong><br>
+            Kesehatan fundamental tidak hanya tentang mencetak laba, tetapi juga tentang cara perusahaan memitigasi risiko *downside*. ${analysisData.risk} Pada iklim suku bunga (interest rate) yang dinamis, struktur neraca yang tangguh adalah jaring pengaman utama. ${currentMode === "nonbank" ? "Beban bunga dari utang yang terlalu masif dapat menyapu bersih *operating profit*, sehingga menyisakan rasio *bottom-line* yang rapuh." : "Kualitas kredit sangat vital bagi institusi finansial; NPL yang membengkak dapat memaksa bank membakar permodalannya sendiri untuk pencadangan (CKPN)."} Investor disarankan untuk memantau terus aspek ini dari kuartal ke kuartal.</p>
+
+            <p><strong>Kebijakan Dividen dan Komitmen Pemegang Saham</strong><br>
+            Menyangkut *Shareholder Return*, ${analysisData.dividend} Perusahaan dengan *Dividend Yield* ${vDY}% mengindikasikan ${vDY >= 4 ? "bahwa manajemen menghargai pasokan likuiditas riil ke kantong investor, sebuah bukti bahwa laba yang dilaporkan di laporan keuangan nyata dan didukung kas." : "fokus perusahaan pada reinvestasi internal (Capital Expenditure) demi mengejar laju pertumbuhan di masa depan, atau mengindikasikan tekanan arus kas operasi."}</p>
+
+            <p><strong>Kesimpulan Akhir & Proyeksi</strong><br>
+            Secara keseluruhan, kualitas fundamental ${ticker} berada pada titik yang mensyaratkan strategi investasi spesifik. Konklusi akhir kami untuk aset ini adalah: <em>${rec}</em> Kekuatan utama terletak pada ${pros[0] ? pros[0].replace(/Tingkat|Valuasi/g, "").toLowerCase() : "aspek tertentu"}, sementara titik lemah yang menjadi kerentanan (vulnerability) berada pada ranah ${cons[0] ? cons[0].toLowerCase() : "risiko bawaan industri"}. Bagi pengelola portofolio maupun investor ritel independen, disiplin dalam penetapan titik masuk (*entry point*) yang disandarkan pada garis *support* teknikal dapat menjadi komplementer yang sempurna bagi analisis fundamental ini.</p>
+        `;
+        document.getElementById("longConclusion").innerHTML = longText;
+
+        // Show result smoothly
+        document.getElementById("resultSection").style.display = "block";
+        document
+          .getElementById("resultSection")
+          .scrollIntoView({ behavior: "smooth" });
+      }
+    </script>
+  </body>
+</html>
