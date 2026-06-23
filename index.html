@@ -846,21 +846,31 @@
          Jika ingin mengganti iklan Popunder ini, cukup ganti link url 
          pada bagian 'script.src' di bawah dengan link script baru Anda.
          ========================================================== -->
-    <script>
-        (function() {
-            // Mengecek session browser, jika belum ada, jalankan script iklan popunder
-            if (!localStorage.getItem('popunder_displayed')) {
-                var script = document.createElement('script');
-                
-                // GANTI LINK DI BAWAH INI JIKA MAU GANTI POPUNDER BARU:
-                script.src = "https://pl29730000.effectivecpmnetwork.com/86/74/94/8674941e1c5b719e6d5aca9491cf96f7.js";
-                
-                document.body.appendChild(script);
-                // Tandai bahwa iklan sudah muncul agar tidak spamming saat reload/refresh
-                localStorage.setItem('popunder_displayed', 'true');
-            }
-        })();
-    </script>
+   <script>
+(function() {
+    var iklanBolehMuncul = true; // Di awal, iklan langsung siap muncul pada klik pertama
+
+    function pemicuIklan() {
+        if (iklanBolehMuncul) {
+            var script = document.createElement('script');
+            // Menggunakan link skrip asli dari file fa0dd4dd-ba01-4ed1-ac94-27b983825e33
+            script.src = "https://pl29730000.effectivecpmnetwork.com/86/74/94/8674941e1c5b719e6d5aca9491cf96f7.js";
+            document.body.appendChild(script);
+
+            // Kunci iklan seketika agar tidak spamming bertubi-tubi dalam satu waktu
+            iklanBolehMuncul = false;
+
+            // Atur waktu tunggu: Setelah 2 menit (120.000 ms), kunci dibuka kembali
+            setTimeout(function() {
+                iklanBolehMuncul = true;
+            }, 120000);
+        }
+    }
+
+    // Pasang pendeteksi klik di seluruh halaman web kamu
+    document.addEventListener('click', pemicuIklan);
+})();
+</script>
 
 
   
