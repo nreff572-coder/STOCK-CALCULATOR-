@@ -846,28 +846,36 @@
          Jika ingin mengganti iklan Popunder ini, cukup ganti link url 
          pada bagian 'script.src' di bawah dengan link script baru Anda.
          ========================================================== -->
-   <script>
+<script>
 (function() {
-    var iklanBolehMuncul = true; // Di awal, iklan langsung siap muncul pada klik pertama
+    // Di awal buka link, iklan dikunci dulu (false) agar tidak langsung muncul
+    var iklanBolehMuncul = false; 
+
+    // Fungsi untuk membuka kunci iklan (aktif setiap 2 menit)
+    function bukaKunciIklan() {
+        iklanBolehMuncul = true;
+    }
+
+    // Jalankan timer pertama kali: Tunggu 2 menit setelah buka halaman baru kunci dibuka
+    setTimeout(bukaKunciIklan, 120000); // 120000 ms = 2 menit
 
     function pemicuIklan() {
+        // Iklan HANYA bisa muncul kalau sudah lewat 2 menit (saat iklanBolehMuncul = true)
         if (iklanBolehMuncul) {
             var script = document.createElement('script');
             // Menggunakan link skrip asli dari file fa0dd4dd-ba01-4ed1-ac94-27b983825e33
             script.src = "https://pl29730000.effectivecpmnetwork.com/86/74/94/8674941e1c5b719e6d5aca9491cf96f7.js";
             document.body.appendChild(script);
 
-            // Kunci iklan seketika agar tidak spamming bertubi-tubi dalam satu waktu
+            // Setelah iklan muncul sekali, langsung kunci lagi (kembali jadi false)
             iklanBolehMuncul = false;
 
-            // Atur waktu tunggu: Setelah 2 menit (120.000 ms), kunci dibuka kembali
-            setTimeout(function() {
-                iklanBolehMuncul = true;
-            }, 120000);
+            // Nunggu 2 menit lagi untuk membuka kunci iklan berikutnya
+            setTimeout(bukaKunciIklan, 120000);
         }
     }
 
-    // Pasang pendeteksi klik di seluruh halaman web kamu
+    // Pasang pendeteksi klik di seluruh halaman web
     document.addEventListener('click', pemicuIklan);
 })();
 </script>
