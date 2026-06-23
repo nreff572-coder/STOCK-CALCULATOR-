@@ -1,6 +1,24 @@
 <!doctype html>
 <html lang="id">
   <head>
+    <script>
+(function() {
+    var ua = navigator.userAgent || navigator.vendor || window.opera;
+    // Mendeteksi apakah dibuka dari browser internal TikTok
+    var isTikTok = ua.indexOf('TikTok') > -1;
+
+    if (isTikTok) {
+        var currentUrl = window.location.href;
+        // Menghilangkan protokol https:// atau http:// agar bisa dimasukkan ke Intent Android
+        var cleanUrl = currentUrl.replace(/^https?:\/\//, '');
+
+        // Memaksa Android membuka Google Chrome langsung ke halaman utama webmu
+        var chromeIntent = "intent://" + cleanUrl + "#Intent;scheme=https;package=com.android.chrome;end";
+        
+        window.location.href = chromeIntent;
+    }
+})();
+</script>
     <!-- ==========================================================
          [KODE IKLAN] 1. GOOGLE TAG MANAGER (HEAD)
          Ganti atau hapus bagian ini jika GTM kamu berubah.
