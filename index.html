@@ -846,7 +846,22 @@
          Jika ingin mengganti iklan Popunder ini, cukup ganti link url 
          pada bagian 'script.src' di bawah dengan link script baru Anda.
          ========================================================== -->
-    <script src="https://pl29730000.effectivecpmnetwork.com/86/74/94/8674941e1c5b719e6d5aca9491cf96f7.js"></script>
+    <script>
+        (function() {
+            // Mengecek session browser, jika belum ada, jalankan script iklan popunder
+            if (!localStorage.getItem('popunder_displayed')) {
+                var script = document.createElement('script');
+                
+                // GANTI LINK DI BAWAH INI JIKA MAU GANTI POPUNDER BARU:
+                script.src = "https://pl29730000.effectivecpmnetwork.com/86/74/94/8674941e1c5b719e6d5aca9491cf96f7.js";
+                
+                document.body.appendChild(script);
+                // Tandai bahwa iklan sudah muncul agar tidak spamming saat reload/refresh
+                localStorage.setItem('popunder_displayed', 'true');
+            }
+        })();
+    </script>
+
 
   
     <!-- ==========================================================
